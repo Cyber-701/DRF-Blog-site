@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.urls import reverse
+
 # Create your models here.
 
 
@@ -14,7 +16,7 @@ class Post(models.Model):
         return self.title
     
     def get_absolute_url(self):
-        return "/"+str(self.id)+"/"
+        return reverse("detail", kwargs={"pk": self.pk})
 
     class Meta:
         ordering = ["-id"]
