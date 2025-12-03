@@ -16,7 +16,7 @@ class Post(models.Model):
         return self.title
     
     def get_absolute_url(self):
-        return reverse("api:detail", kwargs={"pk": self.pk})
+        return reverse("posts:detail", kwargs={"pk": self.pk})
 
     class Meta:
         ordering = ["-id"]

@@ -24,7 +24,7 @@ class PostCreateView(LoginRequiredMixin,generic.CreateView):
         return super().form_valid(form)
 
     def get_success_url(self):
-        return reverse_lazy("api:detail", kwargs={"pk": self.object.pk})
+        return reverse_lazy("posts:detail", kwargs={"pk": self.object.pk})
     
 class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, generic.UpdateView):
     model = Post

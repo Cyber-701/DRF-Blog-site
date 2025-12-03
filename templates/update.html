@@ -9,7 +9,7 @@
             {% csrf_token %}
             {{ form.as_p }}
             <button type="submit" class="btn btn-primary">Saqlash</button>
-            <a href="{% url 'api:detail' post.pk %}" class="btn btn-secondary">Bekor qilish</a>
+            <a href="{% url 'posts:detail' post.pk %}" class="btn btn-secondary">Bekor qilish</a>
          </form>
       </div>
    </div>
