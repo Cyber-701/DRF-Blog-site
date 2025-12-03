@@ -12,8 +12,8 @@
         <p><small class="text-muted" > Posted at: {{post.created}} | Author: {{post.author}} </small> </p>
         {% if post.author == request.user %}
           <small class="text-muted" >
-            <a href="{# url "posts:update" post.id }">Update</a> |
-            <a href="{# url "posts:delete" post.id }">Delete</a>
+            <a href="{% url 'api:post_update' post.id %}">Update</a> |
+            <a href="{% url 'api:post_delete' post.id %}">Delete</a>
           </small>
         {% endif %}
     </div>

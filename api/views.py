@@ -1,8 +1,8 @@
 from django.shortcuts import render
 from .models import Post
 from django.views import generic
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.urls import reverse_lazzy
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.urls import reverse_lazy
 
 class PostListView(generic.ListView):
     model = Post
@@ -16,7 +16,7 @@ class PostDetailView(generic.DetailView):
 
 class PostCreateView(LoginRequiredMixin,generic.CreateView):
     model = Post
-    template_name = "post_create.html"
+    template_name = "create.html"
     fields = ["title", "body"]
 
     def form_valid(self, form):
@@ -24,4 +24,31 @@ class PostCreateView(LoginRequiredMixin,generic.CreateView):
         return super().form_valid(form)
 
     def get_success_url(self):
-        return reverse_lazy("home")
+        return reverse_lazy("api:detail", kwargs={"pk": self.object.pk})
+    
+class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, generic.UpdateView):
+    model = Post
+    template_name = "update.html"
+    context_object_name = "post"
+    fields = ["title", "body"]
+
+    def test_func(self):
+        post = self.get_object()
+        user = self.request.user
+        if user == post.author:
+            return True
+        else:
+            return False
+class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, generic.DeleteView):
+    model = Post
+    template_name = "delete.html"
+    context_object_name = "post"
+    success_url = "/" 
+
+    def test_func(self):
+        post = self.get_object()
+        user = self.request.user
+        if user == post.author:
+            return True
+        else:
+            return False
