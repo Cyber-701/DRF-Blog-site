@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>X va 0 - AI bilan</title>
+    <style>
+        /* Minimal va zamonaviy dizayn */
+        :root {
+            --primary: #2563eb;
+            --primary-light: #3b82f6;
+            --primary-dark: #1d4ed8;
+            --secondary: #64748b;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --background: #ffffff;
+            --surface: #f8fafc;
+            --border: #e2e8f0;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --shadow: 0 1px 3px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            line-height: 1.5;
+        }
+        
+        .app-container {
+            width: 100%;
+            max-width: 500px;
+            background: var(--background);
+            border-radius: 16px;
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+        }
+        
+        /* Header */
+        .app-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            padding: 24px 20px;
+            text-align: center;
+        }
+        
+        .app-header h1 {
+            font-size: 1.75rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        
+        .app-header p {
+            opacity: 0.9;
+            font-size: 0.95rem;
+        }
+        
+        /* Game Info */
+        .game-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .player-indicator {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .player-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            background: white;
+            box-shadow: var(--shadow);
+        }
+        
+        .player-x .player-icon {
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+        
+        .player-o .player-icon {
+            color: var(--secondary);
+            border: 2px solid var(--secondary);
+        }
+        
+        .player-details h3 {
+            font-size: 0.95rem;
+            color: var(--text-light);
+            margin-bottom: 2px;
+        }
+        
+        .player-details p {
+            font-size: 0.85rem;
+            color: var(--text-light);
+        }
+        
+        /* Controls */
+        .game-controls {
+            padding: 20px;
+            background: var(--surface);
+        }
+        
+        .control-group {
+            margin-bottom: 20px;
+        }
+        
+        .control-label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text);
+            margin-bottom: 8px;
+        }
+        
+        select {
+            width: 100%;
+            padding: 12px 16px;
+            font-size: 1rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: white;
+            color: var(--text);
+            cursor: pointer;
+            transition: all 0.2s;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%231e293b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 16px center;
+            background-size: 16px;
+        }
+        
+        select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+        
+        button {
+            flex: 1;
+            padding: 14px 20px;
+            font-size: 1rem;
+            font-weight: 500;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .btn-secondary {
+            background: white;
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+        
+        .btn-secondary:hover {
+            background: var(--surface);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow);
+        }
+        
+        /* Game Board */
+        .game-board-container {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        #board {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            width: 100%;
+            max-width: 300px;
+            margin: 0 auto;
+            aspect-ratio: 1/1;
+        }
+        
+        .cell {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            font-size: 2.5rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            aspect-ratio: 1/1;
+            box-shadow: var(--shadow);
+        }
+        
+        .cell:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .cell:active {
+            transform: translateY(0);
+        }
+        
+        .cell.x {
+            color: var(--primary);
+        }
+        
+        .cell.o {
+            color: var(--secondary);
+        }
+        
+        .cell.winning {
+            background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+            border-color: var(--success);
+            color: var(--success);
+            animation: pulse 1s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        /* Status */
+        #status {
+            margin-top: 20px;
+            padding: 16px;
+            background: var(--surface);
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 500;
+            text-align: center;
+            min-height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            max-width: 300px;
+        }
+        
+        .status-winner {
+            background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+            color: var(--success);
+        }
+        
+        .status-lose {
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            color: var(--danger);
+        }
+        
+        .status-draw {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            color: var(--warning);
+        }
+        
+        /* Utility */
+        .hidden {
+            display: none !important;
+        }
+        
+        /* Mobile Responsive */
+        @media (max-width: 480px) {
+            .app-header {
+                padding: 20px 16px;
+            }
+            
+            .app-header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .game-info {
+                padding: 16px;
+            }
+            
+            .game-controls {
+                padding: 16px;
+            }
+            
+            .game-board-container {
+                padding: 16px;
+            }
+            
+            #board {
+                max-width: 280px;
+                gap: 8px;
+            }
+            
+            .cell {
+                font-size: 2.2rem;
+            }
+            
+            button {
+                padding: 12px 16px;
+                font-size: 0.95rem;
+            }
+        }
+        
+        @media (max-width: 350px) {
+            #board {
+                max-width: 250px;
+            }
+            
+            .cell {
+                font-size: 2rem;
+            }
+        }
+        
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        /* AI Thinking Indicator */
+        .ai-thinking {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .dots {
+            display: flex;
+            gap: 4px;
+        }
+        
+        .dots span {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--text-light);
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+        
+        .dots span:nth-child(1) { animation-delay: -0.32s; }
+        .dots span:nth-child(2) { animation-delay: -0.16s; }
+        
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <div class="app-header">
+            <h1>X va 0</h1>
+            <p>AI bilan raqobatlash</p>
+        </div>
+        
+        <!-- Game Info -->
+        <div class="game-info">
+            <div class="player-indicator player-x">
+                <div class="player-icon">X</div>
+                <div class="player-details">
+                    <h3>Siz</h3>
+                    <p>Foydalanuvchi</p>
+                </div>
+            </div>
+            
+            <div style="color: var(--text-light); font-size: 0.9rem;">VS</div>
+            
+            <div class="player-indicator player-o">
+                <div class="player-icon">O</div>
+                <div class="player-details">
+                    <h3>AI</h3>
+                    <p>Kompyuter</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Controls -->
+        <div class="game-controls">
+            <div class="control-group">
+                <label class="control-label">AI Darajasi</label>
+                <select id="difficulty">
+                    <option value="1">Oson</option>
+                    <option value="2">O'rtacha</option>
+                    <option value="3" selected>Qiyin</option>
+                </select>
+            </div>
+            
+            <div class="control-group">
+                <label class="control-label">Kim boshlaydi?</label>
+                <select id="first">
+                    <option value="h" selected>Men boshlayman (X)</option>
+                    <option value="y">AI boshlaydi (O)</option>
+                </select>
+            </div>
+            
+            <div class="action-buttons">
+                <button id="start" class="btn-primary">
+                    <span>🎮</span> O'yinni Boshlash
+                </button>
+                <button id="restart" class="btn-secondary hidden">
+                    <span>🔄</span> Qayta Boshlash
+                </button>
+            </div>
+        </div>
+        
+        <!-- Game Board -->
+        <div class="game-board-container hidden" id="boardContainer">
+            <div id="board"></div>
+            <div id="status">Tanlang va boshlang!</div>
+        </div>
+    </div>
+
+    <script>
+        // === O'YIN O'ZGARUVCHILARI ===
+        let board = Array(9).fill(' ');
+        let currentPlayer = 'X';
+        let gameActive = false;
+        let difficulty = '3';
+        let playerFirst = true;
+
+        const WIN_COMBINATIONS = [
+            [0,1,2], [3,4,5], [6,7,8],
+            [0,3,6], [1,4,7], [2,5,8],
+            [0,4,8], [2,4,6]
+        ];
+
+        const boardEl = document.getElementById('board');
+        const statusEl = document.getElementById('status');
+        const startBtn = document.getElementById('start');
+        const restartBtn = document.getElementById('restart');
+        const diffSelect = document.getElementById('difficulty');
+        const firstSelect = document.getElementById('first');
+        const boardContainer = document.getElementById('boardContainer');
+
+        // === DOSKA CHIZISH ===
+        function printBoard() {
+            boardEl.innerHTML = '';
+            board.forEach((cell, i) => {
+                const div = document.createElement('div');
+                div.classList.add('cell');
+                if (cell === 'X') div.classList.add('x');
+                if (cell === 'O') div.classList.add('o');
+                div.textContent = cell === ' ' ? '' : cell;
+                div.dataset.index = i;
+                div.addEventListener('click', handleClick);
+                boardEl.appendChild(div);
+            });
+        }
+
+        // === G'OLIB TEKSHIRISH ===
+        function isWinner(player) {
+            return WIN_COMBINATIONS.some(combo =>
+                combo.every(i => board[i] === player)
+            );
+        }
+
+        function isDraw() {
+            return board.every(cell => cell !== ' ');
+        }
+
+        function availableMoves() {
+            return board.map((cell, i) => cell === ' ' ? i : null).filter(v => v !== null);
+        }
+
+        // === AI: OSON ===
+        function aiEasy() {
+            return availableMoves()[Math.floor(Math.random() * availableMoves().length)];
+        }
+
+        // === AI: QIYIN ===
+        function aiHard() {
+            // Yutish
+            for (const move of availableMoves()) {
+                board[move] = 'O';
+                if (isWinner('O')) { board[move] = ' '; return move; }
+                board[move] = ' ';
+            }
+            // Bloklash
+            for (const move of availableMoves()) {
+                board[move] = 'X';
+                if (isWinner('X')) { board[move] = ' '; return move; }
+                board[move] = ' ';
+            }
+            // Markaz
+            if (availableMoves().includes(4)) return 4;
+            // Burchaklar
+            const corners = [0, 2, 6, 8].filter(m => availableMoves().includes(m));
+            if (corners.length > 0) return corners[Math.floor(Math.random() * corners.length)];
+            // Qolgan
+            return aiEasy();
+        }
+
+        // === MINIMAX (MUKAMMAL AI) ===
+        function minimax(isMaximizing) {
+            if (isWinner('O')) return 10;
+            if (isWinner('X')) return -10;
+            if (isDraw()) return 0;
+
+            if (isMaximizing) {
+                let best = -Infinity;
+                for (const move of availableMoves()) {
+                    board[move] = 'O';
+                    const score = minimax(false);
+                    board[move] = ' ';
+                    best = Math.max(best, score);
+                }
+                return best;
+            } else {
+                let best = Infinity;
+                for (const move of availableMoves()) {
+                    board[move] = 'X';
+                    const score = minimax(true);
+                    board[move] = ' ';
+                    best = Math.min(best, score);
+                }
+                return best;
+            }
+        }
+
+        function aiImpossible() {
+            let bestScore = -Infinity;
+            let bestMove = null;
+            for (const move of availableMoves()) {
+                board[move] = 'O';
+                const score = minimax(false);
+                board[move] = ' ';
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestMove = move;
+                }
+            }
+            return bestMove;
+        }
+
+        // === AI YURISHI ===
+        function makeAIMove() {
+            let move;
+            if (difficulty === '1') move = aiEasy();
+            else if (difficulty === '2') move = aiHard();
+            else move = aiImpossible();
+
+            board[move] = 'O';
+            printBoard();
+
+            if (isWinner('O')) {
+                highlightWinner();
+                endGame("AI yutdi!", "status-lose");
+            } else if (isDraw()) {
+                endGame("Durrang!", "status-draw");
+            } else {
+                currentPlayer = 'X';
+                statusEl.textContent = "Sizning navbatingiz";
+                statusEl.className = "";
+            }
+        }
+
+        // === O'YINCHI YURISHI ===
+        function handleClick(e) {
+            const idx = +e.target.dataset.index;
+            if (!gameActive || board[idx] !== ' ' || currentPlayer !== 'X') return;
+
+            board[idx] = 'X';
+            printBoard();
+
+            if (isWinner('X')) {
+                highlightWinner();
+                endGame("Tabriklaymiz! Siz yutdingiz!", "status-winner");
+            } else if (isDraw()) {
+                endGame("Durrang!", "status-draw");
+            } else {
+                currentPlayer = 'O';
+                statusEl.innerHTML = `<div class="ai-thinking">AI o'ylayapti <div class="dots"><span></span><span></span><span></span></div></div>`;
+                statusEl.className = "";
+                setTimeout(makeAIMove, 800);
+            }
+        }
+
+        function highlightWinner() {
+            WIN_COMBINATIONS.forEach(combo => {
+                if (combo.every(i => board[i] === 'X') || combo.every(i => board[i] === 'O')) {
+                    combo.forEach(i => {
+                        const cell = boardEl.children[i];
+                        cell.classList.add('winning');
+                    });
+                }
+            });
+        }
+
+        function endGame(msg, statusClass) {
+            gameActive = false;
+            statusEl.textContent = msg;
+            statusEl.className = statusClass;
+            restartBtn.classList.remove('hidden');
+            startBtn.classList.add('hidden');
+        }
+
+        // === YANGI O'YIN ===
+        function startGame() {
+            board = Array(9).fill(' ');
+            currentPlayer = playerFirst ? 'X' : 'O';
+            gameActive = true;
+            difficulty = diffSelect.value;
+            playerFirst = firstSelect.value === 'h';
+
+            printBoard();
+            boardContainer.classList.remove('hidden');
+            startBtn.classList.add('hidden');
+            restartBtn.classList.remove('hidden');
+
+            statusEl.textContent = playerFirst
+                ? "Siz boshlaysiz. X belgisini qo'ying"
+                : "AI boshlaydi";
+            statusEl.className = "";
+
+            if (!playerFirst) {
+                statusEl.innerHTML = `<div class="ai-thinking">AI o'ylayapti <div class="dots"><span></span><span></span><span></span></div></div>`;
+                setTimeout(makeAIMove, 1000);
+            }
+        }
+
+        startBtn.addEventListener('click', startGame);
+        restartBtn.addEventListener('click', () => {
+            startBtn.classList.remove('hidden');
+            restartBtn.classList.add('hidden');
+            boardContainer.classList.add('hidden');
+            statusEl.textContent = "Tanlang va boshlang!";
+            statusEl.className = "";
+        });
+
+        // Boshlang'ich ko'rinish
+        printBoard();
+        
+        // Animatsiya
+        setTimeout(() => {
+            document.querySelector('.app-container').classList.add('fade-in');
+        }, 100);
+    </script>
+</body>
+</html>
