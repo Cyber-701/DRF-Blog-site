@@ -1,54 +1,65 @@
 from django.shortcuts import render
+from django.urls import reverse_lazy
+
 from .models import Post
 from django.views import generic
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.urls import reverse_lazy
+
 
 class PostListView(generic.ListView):
+    """Barcha postlarni ko'rish uchun view."""
+    
     model = Post
     template_name = "home.html"
     context_object_name = "posts"
+    paginate_by = 10
+
 
 class PostDetailView(generic.DetailView):
+    """Postning batafsil ko'rinishi."""
+    
     model = Post
     template_name = "detail.html"
     context_object_name = "post"
 
-class PostCreateView(LoginRequiredMixin,generic.CreateView):
+
+class PostCreateView(LoginRequiredMixin, generic.CreateView):
+    """Yangi post yaratish."""
+    
     model = Post
     template_name = "create.html"
     fields = ["title", "body"]
+    success_url = reverse_lazy("posts:home")
 
     def form_valid(self, form):
         form.instance.author = self.request.user
         return super().form_valid(form)
 
-    def get_success_url(self):
-        return reverse_lazy("posts:detail", kwargs={"pk": self.object.pk})
-    
+
 class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, generic.UpdateView):
+    """Postni tahrirlash."""
+    
     model = Post
     template_name = "update.html"
     context_object_name = "post"
     fields = ["title", "body"]
+    success_url = reverse_lazy("posts:home")
 
-    def test_func(self):
+    def test_func(self) -> bool:
+        """Faqat muallif o'z postini tahrirlashi mumkin."""
         post = self.get_object()
-        user = self.request.user
-        if user == post.author:
-            return True
-        else:
-            return False
+        return post.author == self.request.user
+
+
 class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, generic.DeleteView):
+    """Postni o'chirish."""
+    
     model = Post
     template_name = "delete.html"
     context_object_name = "post"
-    success_url = "/" 
+    success_url = reverse_lazy("posts:home")
 
-    def test_func(self):
+    def test_func(self) -> bool:
+        """Faqat muallif o'z postini o'chirishi mumkin."""
         post = self.get_object()
-        user = self.request.user
-        if user == post.author:
-            return True
-        else:
-            return False
+        return post.author == self.request.user
