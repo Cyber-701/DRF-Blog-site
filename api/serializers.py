@@ -1,17 +1,33 @@
 # In api/serializers.py
-from rest_framework.serializers import ModelSerializer
+from rest_framework import serializers
 from posts.models import Post
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 
 
-class UserSerializer(ModelSerializer):
+User = get_user_model()
+
+
+class UserSerializer(serializers.ModelSerializer):
+    """User ma'lumotlarini serializatsiya qilish."""
+    
     class Meta:
         model = User
         fields = ["username", "email"]
+        read_only_fields = ["username"]
 
-class PostSerializer(ModelSerializer):
-#    author = UserSerializer()  # Changed from PostSerializers to PostSerializer
+
+class PostSerializer(serializers.ModelSerializer):
+    """Post ma'lumotlarini serializatsiya qilish."""
+    
+    author = UserSerializer(read_only=True)
+    author_id = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.all(),
+        source="author",
+        write_only=True,
+        required=False
+    )
+    
     class Meta:
         model = Post
-        fields = ["id", "author", "title", "body", "created", "updated"]
-#        depth = 1
+        fields = ["id", "author", "author_id", "title", "body", "created", "updated"]
+        read_only_fields = ["created", "updated"]

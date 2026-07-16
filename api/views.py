@@ -1,31 +1,26 @@
-from django.shortcuts import render
-from api.serializers import PostSerializer
-from posts.models import Post
-from rest_framework.views import APIView, Response
 from rest_framework import generics
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
-# Create your views here.
-# class PostListView(APIView):
-#     def get(self, request):
-#         posts = Post.objects.all()
-#         serializers = PostSerializer(posts, many=True)
-#         return Response(serializers.data)
-
-# class PostListAPIView(generics.ListAPIView):
-#     queryset = Post.objects.all()
-#     serializer_class = PostSerializer
+from api.serializers import PostSerializer
+from api.permissions import IsAuthorOrReadOnly
+from posts.models import Post
 
 
-# class PostCreateAPIView(generics.CreateAPIView):
-#     queryset = Post.objects.all()
-#     serializer_class = PostSerializer
-    
 class PostListCreateAPIView(generics.ListCreateAPIView):
+    """Postlarni ko'rish va yangi post yaratish."""
+    
     queryset = Post.objects.all()
     serializer_class = PostSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    
+    def perform_create(self, serializer):
+        """Yangi post yaratishda muallifni avtomatik belgilash."""
+        serializer.save(author=self.request.user)
 
 
-class PostDeleteUpdateAPIView(generics.RetrieveUpdateDestroyAPIView):
-    """Update va Delete bitta clasda"""
+class PostRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
+    """Postni ko'rish, tahrirlash va o'chirish."""
+    
     queryset = Post.objects.all()
-    serializer_class = PostSerializer   
+    serializer_class = PostSerializer
+    permission_classes = [IsAuthorOrReadOnly]
